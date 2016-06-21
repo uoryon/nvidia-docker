@@ -37,22 +37,24 @@ func NewRemoteAPI(addr string) *RemoteAPI {
 }
 
 func (a *RemoteAPI) register(apis ...restapi) {
-	for i, api := range apis {
-		prefix := "/" + api.version()
+	if GpuEnable {
+		for i, api := range apis {
+			prefix := "/" + api.version()
 
-	handlers:
-		a.Handle("GET", prefix+"/gpu/info", api.gpuInfo)
-		a.Handle("GET", prefix+"/gpu/info/json", api.gpuInfoJSON)
-		a.Handle("GET", prefix+"/gpu/status", api.gpuStatus)
-		a.Handle("GET", prefix+"/gpu/status/json", api.gpuStatusJSON)
-		a.Handle("GET", prefix+"/docker/cli", api.dockerCLI)
-		a.Handle("GET", prefix+"/docker/cli/json", api.dockerCLIJSON)
-		a.Handle("GET", prefix+"/mesos/cli", api.mesosCLI)
+		handlers:
+			a.Handle("GET", prefix+"/gpu/info", api.gpuInfo)
+			a.Handle("GET", prefix+"/gpu/info/json", api.gpuInfoJSON)
+			a.Handle("GET", prefix+"/gpu/status", api.gpuStatus)
+			a.Handle("GET", prefix+"/gpu/status/json", api.gpuStatusJSON)
+			a.Handle("GET", prefix+"/docker/cli", api.dockerCLI)
+			a.Handle("GET", prefix+"/docker/cli/json", api.dockerCLIJSON)
+			a.Handle("GET", prefix+"/mesos/cli", api.mesosCLI)
 
-		if i == len(apis)-1 && prefix != "" {
-			prefix = ""
-			goto handlers
+			if i == len(apis)-1 && prefix != "" {
+				prefix = ""
+				goto handlers
+			}
+			a.apis = append(a.apis, api)
 		}
-		a.apis = append(a.apis, api)
 	}
 }

@@ -48,6 +48,7 @@ ifneq ($(DOCKER_SUPPORTED),true)
 	$(error Unsupported Docker version)
 endif
 	@mkdir -p $(BIN_DIR)
+	@chmod 777 $(BIN_DIR)
 	@$(DOCKER_BUILD) -t $(PKG_NAME):$@ -f Dockerfile.$@ $(CURDIR)
 	@$(DOCKER_RUN) -v $(BIN_DIR):/go/bin $(PKG_NAME):$@
 
@@ -69,7 +70,8 @@ distclean:
 
 tarball: build
 	@mkdir -p $(DIST_DIR)
-	tar --transform='s;.*/;$(PKG_NAME)/;' -caf $(DIST_DIR)/$(PKG_NAME)_$(PKG_VERS)_$(PKG_ARCH).tar.xz $(BIN_DIR)/*
+	@chmod 777 $(DIST_DIR)
+	gtar --transform='s;.*/;$(PKG_NAME)/;' -caf $(DIST_DIR)/$(PKG_NAME)_$(PKG_VERS)_$(PKG_ARCH).tar.xz $(BIN_DIR)/*
 	@printf "\nFind tarball at $(DIST_DIR)\n\n"
 
 deb: tarball

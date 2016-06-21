@@ -19,6 +19,8 @@ var (
 	VolumesPath  string
 	SocketPath   string
 
+	GpuEnable bool
+
 	Version string
 	Devices []nvidia.Device
 	Volumes nvidia.VolumeMap
@@ -63,20 +65,48 @@ func main() {
 		return
 	}
 
-	log.Println("Loading NVIDIA unified memory")
-	assert(nvidia.LoadUVM())
+	GpuEnable = true
+	err = func() (err error) {
 
-	log.Println("Loading NVIDIA management library")
-	assert(nvidia.Init())
-	defer func() { assert(nvidia.Shutdown()) }()
+		log.Println("Loading NVIDIA unified memory")
+		err = nvidia.LoadUVM()
+		if err != nil {
+			log.Println("LoadUVM err", err)
+			return
+		}
 
-	log.Println("Discovering GPU devices")
-	Devices, err = nvidia.LookupDevices()
-	assert(err)
+		log.Println("Loading NVIDIA management library")
+		err = nvidia.Init()
+		if err != nil {
+			log.Println("LoadUVM err", err)
+			return
+		}
+		defer func() {
+			err = nvidia.Shutdown()
+			if err != nil {
+				log.Println("Shutdown err", err)
+				return
+			}
+		}()
 
-	log.Println("Provisioning volumes at", VolumesPath)
-	Volumes, err = nvidia.LookupVolumes(VolumesPath)
-	assert(err)
+		log.Println("Discovering GPU devices")
+		Devices, err = nvidia.LookupDevices()
+		if err != nil {
+			log.Println("LoadUVM err", err)
+			return
+		}
+
+		log.Println("Provisioning volumes at", VolumesPath)
+		Volumes, err = nvidia.LookupVolumes(VolumesPath)
+		if err != nil {
+			log.Println("LoadUVM err", err)
+			return
+		}
+		return
+	}()
+	if err != nil {
+		GpuEnable = false
+	}
 
 	plugin := NewPluginAPI(SocketPath)
 	remote := NewRemoteAPI(ListenAddr)
