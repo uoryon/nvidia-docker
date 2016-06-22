@@ -71,9 +71,8 @@ distclean:
 tarball: build
 	@mkdir -p $(DIST_DIR)
 	@chmod 777 $(DIST_DIR)
-	cp $(CURDIR)/nvidia-docker-plugin.conf $(BIN_DIR)/nvidia-docker-plugin.conf
 	cp $(CURDIR)/start.sh $(BIN_DIR)/start.sh
-	gtar --transform='s;.*/;$(PKG_NAME)/_package/;' -caf $(DIST_DIR)/qcos-`date +%Y-%m-%d-%H-%M-%S`_$(PKG_NAME).tar.gz $(BIN_DIR)/
+	gtar --transform='s;.*/;_package/;' -caf $(DIST_DIR)/qcos-`date +%Y-%m-%d-%H-%M-%S`_$(PKG_NAME).tar.gz $(BIN_DIR)/*
 	@printf "\nFind tarball at $(DIST_DIR)\n\n"
 
 deb: tarball

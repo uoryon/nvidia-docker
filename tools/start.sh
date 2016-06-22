@@ -12,7 +12,7 @@ args=`cat $CONF | grep -v '^#' | tr '\n' ' '`
 
 mkdir -p run
 
-cmd = "./nvidia-docker-plugin $args"
+cmd="./nvidia-docker-plugin $args"
 echo $cmd
 exec $cmd
 
